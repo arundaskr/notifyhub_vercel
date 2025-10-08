@@ -77,3 +77,37 @@ export const departmentService = {
     return result.data.createPost;
   },
 };
+
+export const reminderService = {
+  async getReminders(page = 1, limit = 20) {
+    const query = gql`
+      query ListReminders($page: Int!, $limit: Int!) {
+        todos(options: { paginate: { page: $page, limit: $limit } }) {
+          data { id title completed user { id name email } }
+          meta { totalCount }
+        }
+      }
+    `;
+    const result = await client.query({ query, variables: { page, limit } });
+    return result.data.todos;
+  },
+
+  async createReminder(reminderData: { title: string; completed: boolean; userId: string }) {
+    const mutation = gql`
+      mutation CreateReminder($title: String!, $completed: Boolean!, $userId: ID!) {
+        createTodo(input: { title: $title, completed: $completed, userId: $userId }) {
+          id title completed user { id name }
+        }
+      }
+    `;
+    const result = await client.mutate({ 
+      mutation, 
+      variables: {
+        title: reminderData.title,
+        completed: false,
+        userId: reminderData.userId || "1"
+      }
+    });
+    return result.data.createTodo;
+  }
+};

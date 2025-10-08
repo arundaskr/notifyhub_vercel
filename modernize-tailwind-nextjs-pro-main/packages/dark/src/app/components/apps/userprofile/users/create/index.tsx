@@ -93,7 +93,7 @@ const CreateUserApp = () => {
               required
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className=" grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             <div>
               <Label htmlFor="password">Password</Label>
               <TextInput

@@ -1,29 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client";
-import {
-  Table,
-  Badge,
-  Button,
-  Spinner,
-  Alert,
-  Tabs, 
-  TextInput,
-} from "flowbite-react";
-
-export const GET_REMINDERS = gql`
-  query GetReminders {
-    todos(options: { paginate: { page: 1, limit: 20 } }) {
-      data {
-        id
-        title
-        completed
-      }
-    }
-  }
-`;
+import { Table, Badge, Button, Spinner, Alert, Tabs, TextInput } from "flowbite-react";
+import { reminderService } from "@/app/services/api";
+import Link from "next/link";
 
 interface Reminder {
   id: string;
@@ -33,10 +13,26 @@ interface Reminder {
 
 const InvoiceList = () => {
   const router = useRouter();
-  const { data, loading, error } = useQuery(GET_REMINDERS);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    const fetchReminders = async () => {
+      try {
+        setLoading(true);
+        const response = await reminderService.getReminders();
+        setReminders(response.data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReminders();
+  }, []);
 
   if (loading)
     return (
@@ -46,13 +42,8 @@ const InvoiceList = () => {
     );
 
   if (error)
-    return <Alert color="failure">Error: {error.message}</Alert>;
+    return <Alert color="failure">Error: {error}</Alert>;
 
-  const reminders: Reminder[] = data?.todos?.data || [];
-
-
-
-  
   const filteredReminders = reminders
     .filter((r) =>
       filter === "all" ? true : filter === "completed" ? r.completed : !r.completed
@@ -63,7 +54,6 @@ const InvoiceList = () => {
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-6">Reminders</h2>
 
-      
       <Tabs
         aria-label="Reminder tabs"
         variant="underline"
@@ -78,19 +68,17 @@ const InvoiceList = () => {
         <Tabs.Item title="Completed" />
       </Tabs>
 
-     
       <div className="mt-4 flex justify-between items-center">
         <TextInput
           placeholder="Search reminders..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Button onClick={() => router.push("/apps/invoice/create")}>
-          + New Reminder
-        </Button>
+        <Link href="/apps/invoice/create">
+          <Button color="primary">+ New Reminder</Button>
+        </Link>
       </div>
 
-     
       {filteredReminders.length === 0 ? (
         <p className="text-gray-500 mt-6">No reminders found.</p>
       ) : (
