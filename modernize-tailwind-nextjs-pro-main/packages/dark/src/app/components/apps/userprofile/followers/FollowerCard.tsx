@@ -106,6 +106,7 @@ const EditDepartmentModal = ({
   );
 };
 
+// This is a comment to force a rebuild.
 const FollowerCard = () => {
   const { departments, setDepartmentSearch }: any = useContext(UserDataContext);
 
