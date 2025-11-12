@@ -155,7 +155,7 @@ const EditUserModal = ({
 // 2. FriendsCard Component
 // -------------------------------------------------------------
 const FriendsCard = () => {
-  const { followers, setFollowerSearch }: any = useContext(UserDataContext);
+  const { users, setUserSearch }: any = useContext(UserDataContext);
   
   // State for Modal Management
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -176,7 +176,7 @@ const FriendsCard = () => {
     <>
       <div className="md:flex justify-between mb-6">
         <h5 className="text-2xl flex gap-3 items-center sm:my-0 my-4">
-          Users <Badge color={"secondary"}>{followers.length}</Badge>
+          Users <Badge color={"secondary"}>{users.length}</Badge>
         </h5>
         <div className="flex gap-3">
           <TextInput
@@ -185,7 +185,7 @@ const FriendsCard = () => {
             sizing="md"
             className="form-control"
             placeholder="Search Friends"
-            onChange={(e) => setFollowerSearch(e.target.value)}
+            onChange={(e) => setUserSearch(e.target.value)}
           />
           {/* Keeping Link for Add User as it often goes to a dedicated creation page */}
           <Link href="/apps/user-profile/friends/create"> 
@@ -195,7 +195,7 @@ const FriendsCard = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-6">
-        {followers.map(
+        {users.map(
           (profile: UserProfile) => (
             <div
               className="lg:col-span-4 md:col-span-4 sm:col-span-6 col-span-12"

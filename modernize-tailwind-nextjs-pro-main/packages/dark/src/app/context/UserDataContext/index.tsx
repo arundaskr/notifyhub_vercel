@@ -1,11 +1,12 @@
 'use client'
 import React, { createContext, useState, useEffect } from 'react';
 import { PostType, profiledataType } from '@/app/(DashboardLayout)/types/apps/userProfile';
-import { userService, departmentService } from '@/app/services/api';
+import { userService, departmentService } from '../../services/api';
 
 export type UserDataContextType = {
     posts: PostType[];
-    users: any[]; // Changed from user: any (singular)
+    users: any[];
+    user: any;
     gallery: any[];
     departments: any[];
     profileData: profiledataType;
@@ -40,11 +41,13 @@ const config = {
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [posts, setPosts] = useState<PostType[]>(config.posts);
     const [user, setUser] = useState<any>(null); // Changed from users
+    const [users, setUsers] = useState<any[]>([]); // Add this
     const [gallery, setGallery] = useState<any[]>(config.gallery);
     // const [followers, setFollowers] = useState<any[]>(config.followers); // Removed
     const [departments, setDepartments] = useState<any[]>(config.departments);
     // const [followerSearch, setFollowerSearch] = useState<string>(config.followerSearch); // Removed
     const [departmentSearch, setDepartmentSearch] = useState<string>(config.departmentSearch);
+    const [userSearch, setUserSearch] = useState<string>('');
     const [error, setError] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(config.loading);
 
@@ -63,8 +66,10 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             try {
                 setLoading(true)
                 const userResponse = await userService.getMe(); // Changed from usersResponse
+                const usersResponse = await userService.getAllUsers(); // Add this
                 const deptsResponse = await departmentService.getDepartments();
                 setUser(userResponse); // Changed from setUsers(usersResponse.data)
+                setUsers(usersResponse); // Add this
                 // setFollowers(usersResponse.data); // Removed
                 setDepartments(deptsResponse);
             } catch (err) {
@@ -101,6 +106,7 @@ const filterDepartments = () => {
             value={{
                 posts,
                 user,
+                users,
                 gallery,
                 departments: filterDepartments(),
                 profileData,
@@ -117,6 +123,8 @@ const filterDepartments = () => {
                 // followerSearch, // Removed
                 setDepartmentSearch,
                 departmentSearch,
+                userSearch,
+                setUserSearch,
             }}
         >
             {children}

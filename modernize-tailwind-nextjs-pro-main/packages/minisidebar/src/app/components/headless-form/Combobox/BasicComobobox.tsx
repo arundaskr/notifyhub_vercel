@@ -28,7 +28,7 @@ const people: Person[] = [
 
 const BasicCombobox = () => {
   const [query, setQuery] = useState<string>("");
-  const [selected, setSelected] = useState<Person>(people[1]);
+  const [selected, setSelected] = useState<Person | null>(people[1]);
 
   const filteredPeople =
     query === ""
@@ -47,7 +47,7 @@ const BasicCombobox = () => {
         <div className="">
           <Combobox
             value={selected}
-            onChange={(value: Person) => setSelected(value)}
+            onChange={setSelected}
             onClose={() => setQuery("")}
           >
             <div className="relative">
