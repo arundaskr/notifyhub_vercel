@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   TbBrandDribbble,
   TbBrandFacebook,
@@ -13,8 +13,11 @@ import Banner from "/public/images/backgrounds/profilebg.jpg";
 import Link from "next/link";
 import { Button } from "flowbite-react";
 import ProfileTab from "./ProfileTab";
+import { UserDataContext } from "@/app/context/UserDataContext/index"; // Import UserDataContext
 
 const ProfileBanner = () => {
+  const { reminders, departments, users } = useContext(UserDataContext); // Get data from context
+
   return (
     <>
       <CardBox className="p-0 overflow-hidden">
@@ -34,7 +37,7 @@ const ProfileBanner = () => {
                     className="block mx-auto text-ld opacity-50 "
                     size="20"
                   />
-                  <h4 className="text-xl">12</h4>
+                  <h4 className="text-xl">{reminders.filter((rem: any) => rem.active).length}</h4>
                   <p className="text-darklink text-sm">Active Reminders</p>
                 </div>
                 <div className="text-center">
@@ -42,7 +45,7 @@ const ProfileBanner = () => {
                     className="block mx-auto text-ld opacity-50"
                     size="20"
                   />
-                  <h4 className="text-xl">8</h4>
+                  <h4 className="text-xl">{departments.length}</h4>
                   <p className="text-darklink text-sm">Total Departments</p>
                 </div>
                 <div className="text-center">
@@ -50,7 +53,7 @@ const ProfileBanner = () => {
                     className="block mx-auto text-ld opacity-50"
                     size="20"
                   />
-                  <h4 className="text-xl">356</h4>
+                  <h4 className="text-xl">{users.length}</h4>
                   <p className="text-darklink text-sm">Total Users</p>
                 </div>
               </div>
