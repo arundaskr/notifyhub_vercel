@@ -53,17 +53,6 @@ type UpdateDepartmentMutationResult = {
   };
 };
 
-// Define the type for the updateDepartment mutation result
-type UpdateDepartmentMutationResult = {
-  updateDepartment: {
-    ok: boolean;
-    department: {
-      id: string;
-      name: string;
-    };
-  };
-};
-
 const LIST_REMINDERS_QUERY = gql`
   query Reminders($active: Boolean) {
     reminders(active: $active) {
