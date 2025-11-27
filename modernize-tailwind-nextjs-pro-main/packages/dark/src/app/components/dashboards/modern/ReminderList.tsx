@@ -100,7 +100,7 @@ export const ReminderList = () => {
                         </Link>
                     </div>
                 </div>
-                {data && renderTable(data.reminders.slice(0, 3))} {/* Corrected usage */}
+                {data && data.reminders && renderTable(data.reminders.slice(0, 3))} {/* Corrected usage */}
             </> {/* Closed React Fragment */}
         </CardBox>
     )
