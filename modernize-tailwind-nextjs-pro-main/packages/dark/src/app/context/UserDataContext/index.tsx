@@ -28,7 +28,36 @@ export type UserDataContextType = {
     toggleDepartmentStatus: (id: number) => void;
 };
 
-export const UserDataContext = createContext<UserDataContextType | undefined>(undefined);
+export const UserDataContext = createContext<UserDataContextType>({
+    posts: [],
+    users: [],
+    user: null,
+    gallery: [],
+    departments: [],
+    reminders: [],
+    profileData: {
+        name: '',
+        role: '',
+        avatar: '',
+        coverImage: '',
+        postsCount: 0,
+        followersCount: 0,
+        followingCount: 0,
+    },
+    loading: true,
+    error: null,
+    userSearch: '',
+    departmentSearch: '',
+    setUserSearch: () => {},
+    setDepartmentSearch: () => {},
+    addGalleryItem: () => {},
+    addReply: () => {},
+    likePost: () => {},
+    addComment: () => {},
+    likeReply: () => {},
+    toggleFollow: () => {},
+    toggleDepartmentStatus: () => {},
+});
 
 const config = {
     posts: [], 
