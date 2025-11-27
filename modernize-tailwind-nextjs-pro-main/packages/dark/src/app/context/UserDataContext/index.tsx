@@ -69,6 +69,23 @@ const config = {
     loading: true,
 };
 
+// Define interfaces for the data returned by each query
+interface MeData {
+  me: any; // Define a more specific type if possible
+}
+
+interface UsersData {
+  users: any[]; // Define a more specific type if possible
+}
+
+interface DepartmentsData {
+  departments: any[]; // Define a more specific type if possible
+}
+
+interface RemindersData {
+  reminders: Reminder[];
+}
+
 const ME_QUERY = gql`
   query Me {
     me {
@@ -91,6 +108,7 @@ const LIST_USERS_QUERY = gql`
       email
       company {
         id
+        name
         name
       }
     }
@@ -135,14 +153,19 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [error, setError] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(config.loading);
 
-    const { data: meData, loading: meLoading, error: meError } = ApolloReact.useQuery(ME_QUERY);
-    const { data: usersData, loading: usersLoading, error: usersError } = ApolloReact.useQuery(LIST_USERS_QUERY);
-    const { data: deptsData, loading: deptsLoading, error: deptsError } = ApolloReact.useQuery(LIST_DEPARTMENTS_QUERY);
-    const { data: remindersData, loading: remindersLoading, error: remindersError } = ApolloReact.useQuery(LIST_REMINDERS_QUERY, {
+    const { data: meApolloData, loading: meLoading, error: meError } = ApolloReact.useQuery(ME_QUERY);
+    const { data: usersApolloData, loading: usersLoading, error: usersError } = ApolloReact.useQuery(LIST_USERS_QUERY);
+    const { data: deptsApolloData, loading: deptsLoading, error: deptsError } = ApolloReact.useQuery(LIST_DEPARTMENTS_QUERY);
+    const { data: remindersApolloData, loading: remindersLoading, error: remindersError } = ApolloReact.useQuery(LIST_REMINDERS_QUERY, {
         variables: { active: true },
     });
 
     useEffect(() => {
+        const meData = meApolloData as MeData | undefined;
+        const usersData = usersApolloData as UsersData | undefined;
+        const deptsData = deptsApolloData as DepartmentsData | undefined;
+        const remindersData = remindersApolloData as RemindersData | undefined;
+
         if (meData) setUser(meData.me);
         if (usersData) setUsers(usersData.users);
         if (deptsData) setDepartments(deptsData.departments);
@@ -156,7 +179,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         setLoading(meLoading || usersLoading || deptsLoading || remindersLoading);
 
-    }, [meData, usersData, deptsData, remindersData, meLoading, usersLoading, deptsLoading, remindersLoading, meError, usersError, deptsError, remindersError]);
+    }, [meApolloData, usersApolloData, deptsApolloData, remindersApolloData, meLoading, usersLoading, deptsLoading, remindersLoading, meError, usersError, deptsError, remindersError]);
 
     const [profileData, setProfileData] = useState<profiledataType>({
         name: 'Mathew Anderson',

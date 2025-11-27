@@ -9,9 +9,7 @@ import { CustomizerContextProvider } from "@/app/context/CustomizerContext";
 import { ApolloWrapper } from "@/app/components/ApolloWrapper";
 import "../utils/i18n";
 import NextTopLoader from "nextjs-toploader";
-import { getServerSession } from "next-auth";
 import SessionProviderWrapper from "@/app/components/nextauth/SessionProviderWrapper";
-import { authOptions } from "@nextauth/app/api/auth/[...nextauth]/route";
 
 export const metadata: Metadata = {
   title: "Modernize - Nextjs",
@@ -23,7 +21,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
   return (
     <html lang="en">
       <head>
@@ -31,7 +28,7 @@ export default async function RootLayout({
         <ThemeModeScript />
       </head>
       <body className={`${plus_jakarta_sans.className}`}>
-        <SessionProviderWrapper session={session}>
+        <SessionProviderWrapper>
           <ApolloWrapper>
             <Flowbite theme={{ theme: customTheme }}>
               <CustomizerContextProvider>

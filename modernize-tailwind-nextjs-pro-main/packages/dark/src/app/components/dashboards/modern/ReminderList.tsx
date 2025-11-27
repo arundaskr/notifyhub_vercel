@@ -19,6 +19,10 @@ const LIST_REMINDERS_QUERY = gql`
   }
 `;
 
+interface RemindersData {
+  reminders: Reminder[];
+}
+
 export const ReminderList = () => {
     const { data, loading, error } = ApolloReact.useQuery(LIST_REMINDERS_QUERY, {
         variables: { active: true }, // Pass the active variable
@@ -85,6 +89,8 @@ export const ReminderList = () => {
         </div>
     );
 
+    const typedData = data as RemindersData;
+
     return (
         <CardBox>
             <> {/* Added React Fragment */}
@@ -100,7 +106,7 @@ export const ReminderList = () => {
                         </Link>
                     </div>
                 </div>
-                {data && data.reminders && renderTable(data.reminders.slice(0, 3))} {/* Corrected usage */}
+                {typedData && typedData.reminders && renderTable(typedData.reminders.slice(0, 3))} {/* Corrected usage */}
             </> {/* Closed React Fragment */}
         </CardBox>
     )

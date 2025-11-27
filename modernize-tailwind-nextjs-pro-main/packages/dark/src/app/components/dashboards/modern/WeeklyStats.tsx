@@ -22,6 +22,10 @@ const LIST_REMINDERS_QUERY = gql`
   }
 `;
 
+interface RemindersData {
+  reminders: Reminder[];
+}
+
 export const WeeklyStats = () => {
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [activeRemindersCount, setActiveRemindersCount] = useState<number>(0);
@@ -33,7 +37,8 @@ export const WeeklyStats = () => {
 
     useEffect(() => {
         if (data) {
-            const fetchedReminders = data.reminders;
+            const typedData = data as RemindersData;
+            const fetchedReminders = typedData.reminders;
             setReminders(fetchedReminders);
 
             // Calculate active reminders
