@@ -14,6 +14,7 @@ export type UserDataContextType = {
     departments: any[];
     reminders: Reminder[]; // Add reminders to the type
     profileData: profiledataType;
+    permissions: string[]; // Add permissions to the type
     loading: boolean;
     error: null | any;
     userSearch: string;
@@ -45,6 +46,7 @@ export const UserDataContext = createContext<UserDataContextType>({
         followersCount: 0,
         followingCount: 0,
     },
+    permissions: [], // Initial permissions
     loading: true,
     error: null,
     userSearch: '',
@@ -66,6 +68,7 @@ const config = {
     gallery: [],
     departments: [],
     reminders: [],
+    permissions: [],
     departmentSearch: '',
     loading: true,
 };
@@ -95,6 +98,11 @@ const ME_QUERY = gql`
       email
       firstName
       lastName
+      permissions
+      department {
+        id
+        name
+      }
       company {
         id
         name
@@ -137,6 +145,7 @@ const LIST_REMINDERS_QUERY = gql`
       id
       title
       description
+      senderEmail
       reminderStartDate
       reminderEndDate
       active
@@ -151,6 +160,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [gallery, setGallery] = useState<any[]>(config.gallery);
     const [departments, setDepartments] = useState<any[]>(config.departments);
     const [reminders, setReminders] = useState<Reminder[]>(config.reminders);
+    const [permissions, setPermissions] = useState<string[]>(config.permissions);
     const [departmentSearch, setDepartmentSearch] = useState<string>(config.departmentSearch);
     const [userSearch, setUserSearch] = useState<string>('');
     const [error, setError] = useState<any>(null);
@@ -188,6 +198,8 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (USE_MOCK) {
             console.log("UserDataContext: Using Mock Data");
             setUser(mockUser);
+            // Mock permissions for testing if needed, keeping empty for now or mirror mockUser if it has them
+            setPermissions([]); 
             setUsers(mockUsers);
             setDepartments(mockDepartments);
             setReminders(mockReminders);
@@ -198,6 +210,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (meData?.me) {
             console.log("UserDataContext: Setting user data", meData.me);
             setUser(meData.me);
+            setPermissions(meData.me.permissions || []);
         } else if (!hasToken) {
             console.warn("UserDataContext: No auth token found, user data will not load");
         }
@@ -269,6 +282,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 departments: filterDepartments(),
                 reminders,
                 profileData,
+                permissions,
                 loading,
                 error,
                 addGalleryItem: () => {},

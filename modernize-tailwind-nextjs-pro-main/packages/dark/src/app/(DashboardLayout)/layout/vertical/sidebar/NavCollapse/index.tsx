@@ -1,7 +1,6 @@
 
-
 import { Sidebar } from "flowbite-react";
-import React from "react";
+import React, { useContext } from "react";
 import { ChildItem } from "../Sidebaritems";
 import NavItems from "../NavItems";
 import { Icon } from "@iconify/react";
@@ -9,6 +8,7 @@ import { HiOutlineChevronDown } from "react-icons/hi";
 import { twMerge } from "tailwind-merge";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { UserDataContext } from "@/app/context/UserDataContext";
 
 interface NavCollapseProps {
   item: ChildItem;
@@ -18,6 +18,15 @@ const NavCollapse: React.FC<NavCollapseProps> = ({ item }: any) => {
   const pathname = usePathname();
   const activeDD = item.children.find((t: { url: string; }) => t.url === pathname)
   const { t } = useTranslation();
+  const { permissions } = useContext(UserDataContext);
+
+  const validChildren = item.children?.filter((child: any) => {
+      if (!child.requiredPermission) return true;
+      return permissions?.includes(child.requiredPermission);
+  });
+
+  if (!validChildren || validChildren.length === 0) return null;
+
   return (
     <>
       <Sidebar.Collapse
@@ -38,9 +47,9 @@ const NavCollapse: React.FC<NavCollapseProps> = ({ item }: any) => {
         }}
       >
         {/* Render child items */}
-        {item.children && (
+        {validChildren && (
           <Sidebar.ItemGroup className="sidebar-dropdown">
-            {item.children.map((child: any) => (
+            {validChildren.map((child: any) => (
               <React.Fragment key={child.id}>
                 {/* Render NavItems for child items */}
                 {child.children ? (

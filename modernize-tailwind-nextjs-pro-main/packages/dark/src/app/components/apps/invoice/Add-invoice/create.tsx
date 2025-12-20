@@ -17,7 +17,7 @@ const CreateReminderPage = () => {
     senderName: "",
     senderEmail: "",
     receiverEmail: "",
-    intervalType: "Daily",
+    intervalType: "daily",
     reminderEndDate: "",
     active: true,
     reminderStartDate: "",
@@ -39,11 +39,26 @@ const CreateReminderPage = () => {
         reminderStartDate: formData.reminderStartDate || undefined,
         reminderEndDate: formData.reminderEndDate || undefined,
       };
-      await reminderService.createReminder(dataToSend);
+
+      // Validation: End Date >= Start Date
+      if (formData.reminderStartDate && formData.reminderEndDate) {
+        if (new Date(formData.reminderEndDate) < new Date(formData.reminderStartDate)) {
+          throw new Error("Reminder End Date cannot be earlier than Start Date.");
+        }
+      }
+
+      const payload = {
+        ...dataToSend,
+        reminderStartDate: formData.reminderStartDate ? new Date(formData.reminderStartDate).toISOString() : undefined,
+        reminderEndDate: formData.reminderEndDate ? new Date(formData.reminderEndDate).toISOString() : undefined,
+      };
+
+      console.log('Completing payload:', payload);
+      await reminderService.createReminder(payload);
       setShowAlert(true);
       setTimeout(() => router.push('/apps/invoice/list'), 2000);
     } catch (error) {
-      setError("Failed to create reminder.");
+      setError(error instanceof Error ? error.message : "Failed to create reminder.");
     } finally {
       setIsSubmitting(false);
     }
@@ -88,9 +103,9 @@ const CreateReminderPage = () => {
             <div className="lg:col-span-6 col-span-12">
               <Label htmlFor="intervalType">Interval Type</Label>
               <Select id="intervalType" value={formData.intervalType} onChange={(e) => handleChange('intervalType', e.target.value)}>
-                <option>Daily</option>
-                <option>Weekly</option>
-                <option>Monthly</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
               </Select>
             </div>
             <div className="lg:col-span-6 col-span-12">

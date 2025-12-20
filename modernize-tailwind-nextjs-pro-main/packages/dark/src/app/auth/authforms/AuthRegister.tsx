@@ -31,6 +31,11 @@ const AuthRegister = () => {
       return;
     }
 
+    if (!formData.email.trim().toLowerCase().endsWith("@gmail.com")) {
+      setError("Only Gmail addresses are allowed.");
+      return;
+    }
+
     setError("");
     setIsSubmitting(true);
 

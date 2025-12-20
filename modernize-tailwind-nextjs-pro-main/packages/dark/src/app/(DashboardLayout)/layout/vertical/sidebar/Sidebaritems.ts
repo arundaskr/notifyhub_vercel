@@ -12,6 +12,7 @@ export interface ChildItem {
   subtitle?: string;
   badge?: boolean;
   badgeType?: string;
+  requiredPermission?: string;
 }
 
 export interface MenuItem {
@@ -80,11 +81,13 @@ const SidebarContent: MenuItem[] = [
             id: uniqueId(),
             name: "Department",
             url: "/apps/user-profile/followers",
+            requiredPermission: 'departments.create',
           },
           {
             id: uniqueId(),
             name: "Users",
             url: "/apps/user-profile/friends",
+            requiredPermission: 'users.create',
           },
         ],
       },

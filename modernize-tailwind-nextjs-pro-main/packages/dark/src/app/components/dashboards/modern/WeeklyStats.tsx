@@ -35,7 +35,7 @@ export const WeeklyStats = () => {
             // Calculate completed (inactive)
             setCompletedRemindersCount(reminders.length - active.length);
 
-            // Calculate weekly reminders
+            // Calculate weekly reminders (Active only)
             const startOfWeek = new Date();
             startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Start of current week (Sunday)
             startOfWeek.setHours(0, 0, 0, 0);
@@ -46,11 +46,11 @@ export const WeeklyStats = () => {
 
             const weekly = reminders.filter((rem: Reminder) => {
                 const reminderDate = new Date(rem.reminderStartDate);
-                return reminderDate >= startOfWeek && reminderDate <= endOfWeek;
+                return rem.active && reminderDate >= startOfWeek && reminderDate <= endOfWeek;
             });
             setWeeklyRemindersCount(weekly.length);
 
-            // Calculate today's reminders
+            // Calculate today's reminders (Active only)
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
@@ -58,7 +58,7 @@ export const WeeklyStats = () => {
 
             const todays = reminders.filter((rem: Reminder) => {
                 const reminderDate = new Date(rem.reminderStartDate);
-                return reminderDate >= today && reminderDate < tomorrow;
+                return rem.active && reminderDate >= today && reminderDate < tomorrow;
             });
             setTodaysRemindersCount(todays.length);
         }
@@ -205,68 +205,64 @@ export const WeeklyStats = () => {
         };
     };
 
-    // Get pie chart data based on status filter
-    const getPieChartData = () => {
-        let series: number[] = [];
-        let labels: string[] = [];
+    // Health Score Calculation
+    const totalReminders = activeRemindersCount + completedRemindersCount;
+    const healthScore = totalReminders > 0 
+        ? Math.round((completedRemindersCount / totalReminders) * 100) 
+        : 100;
 
-        switch (statusFilter) {
-            case 'all':
-                series = [activeRemindersCount, completedRemindersCount];
-                labels = ["Active", "Completed"];
-                break;
-            case 'completed':
-                // Show breakdown of completed reminders (example: by priority or type)
-                series = [completedRemindersCount * 0.6, completedRemindersCount * 0.4];
-                labels = ["On Time", "Delayed"];
-                break;
-            case 'pending':
-                // Show breakdown of pending reminders
-                series = [activeRemindersCount * 0.7, activeRemindersCount * 0.3];
-                labels = ["Urgent", "Normal"];
-                break;
-        }
-
-        return {
-            series: series,
-            options: {
-                labels: labels,
-                chart: { 
-                    type: "donut" as const, 
-                    height: 250,
-                    fontFamily: "inherit",
-                    foreColor: "#adb0bb",
-                    toolbar: { show: false }
-                },
-                colors: ["var(--color-primary)", "var(--color-lightprimary)"],
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            size: '75%',
-                            labels: {
-                                show: true,
-                                name: { show: true, fontSize: '12px', offsetY: 0, color: '#adb0bb' },
-                                value: { show: true, fontSize: '24px', offsetY: 10, color: '#adb0bb' },
-                                total: { 
-                                    show: true, 
-                                    label: labels[0], 
-                                    color: '#adb0bb',
-                                    formatter: () => series[0].toString()
-                                }
-                            }
-                        },
-                    },
-                },
-                stroke: { show: false },
-                dataLabels: { enabled: false },
-                legend: { position: "bottom" as const, show: true },
-                tooltip: { theme: "dark", fillSeriesColor: false },
-            }
-        };
+    const getHealthScoreColor = (score: number) => {
+        if (score >= 75) return "#13DEB9"; // Success Green
+        if (score >= 40) return "#FFAE1F"; // Warning Yellow
+        return "#FA896B"; // Error Red
     };
 
+    const healthColor = getHealthScoreColor(healthScore);
+
+    const healthScoreChart = {
+        series: [healthScore],
+        options: {
+            chart: {
+                type: "radialBar" as const,
+                height: 250,
+                offsetY: -10,
+                fontFamily: "inherit",
+                sparkline: { enabled: true }
+            },
+            plotOptions: {
+                radialBar: {
+                    startAngle: -90,
+                    endAngle: 90,
+                    track: {
+                        background: "rgba(128, 128, 128, 0.1)", // Subtle track
+                        strokeWidth: '100%',
+                        margin: 0, 
+                    },
+                    hollow: {
+                        size: '65%', // Thicker ring
+                    },
+                    dataLabels: {
+                        name: { show: false },
+                        value: { show: false } // Hide default value to use custom overlay
+                    }
+                }
+            },
+            grid: {
+                padding: { top: -10, bottom: 20 }
+            },
+            fill: {
+                type: "solid",
+                colors: [healthColor],
+            },
+            stroke: {
+                lineCap: "round" as const
+            },
+            labels: ["Health Score"],
+        }
+    };
+
+    // Existing "Weekly Trend" logic...
     const BarChartData = getBarChartData();
-    const PieChartData = getPieChartData();
 
     const SalesData = [
         {
@@ -299,12 +295,6 @@ export const WeeklyStats = () => {
         { value: 'daily', label: 'Daily' },
         { value: 'weekly', label: 'Weekly' },
         { value: 'monthly', label: 'Monthly' },
-    ];
-
-    const statusTabs: { value: StatusFilter; label: string }[] = [
-        { value: 'all', label: 'All' },
-        { value: 'completed', label: 'Completed' },
-        { value: 'pending', label: 'Pending' },
     ];
 
     return (
@@ -344,35 +334,28 @@ export const WeeklyStats = () => {
                     />
                 </div>
 
-                {/* Pie Chart */}
-                <div className="bg-lightwarning/10 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <h6 className="font-semibold">Distribution</h6>
-                        <div className="flex gap-1">
-                            {statusTabs.map((tab) => (
-                                <Button
-                                    key={tab.value}
-                                    size="xs"
-                                    color={statusFilter === tab.value ? "blue" : "gray"}
-                                    onClick={() => setStatusFilter(tab.value)}
-                                    className={`px-3 py-1 text-xs ${
-                                        statusFilter === tab.value 
-                                            ? 'bg-primary text-white' 
-                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                    }`}
-                                >
-                                    {tab.label}
-                                </Button>
-                            ))}
+                {/* Health Score Gauge */}
+                <div className="bg-lightwarning/10 rounded-lg p-4 flex flex-col items-center justify-between relative overflow-hidden">
+                    <h6 className="font-semibold w-full text-left z-10">Health Score</h6>
+                    <div className="relative w-full flex justify-center items-center mt-2">
+                        <Chart
+                            options={healthScoreChart.options}
+                            series={healthScoreChart.series}
+                            type="radialBar"
+                            height="250px"
+                            width={"100%"}
+                        />
+                        {/* Custom Overlay */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-4 text-center">
+                           <h2 className="text-4xl font-extrabold mb-1" style={{ color: healthColor }}>
+                               {healthScore}%
+                           </h2>
+                           <p className="text-sm font-medium mb-1" style={{ color: healthColor }}>
+                               {healthScore >= 75 ? "Excellent" : healthScore >= 40 ? "Average" : "Poor"}
+                           </p>
+                           <p className="text-xs text-gray-400">Completion Rate</p>
                         </div>
                     </div>
-                    <Chart
-                        options={PieChartData.options}
-                        series={PieChartData.series}
-                        type="pie"
-                        height="250px"
-                        width={"100%"}
-                    />
                 </div>
             </div>
 

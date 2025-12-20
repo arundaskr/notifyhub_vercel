@@ -21,6 +21,13 @@ export default function AuthLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setError("");
+
+      const trimmedUsername = formData.username.trim();
+      if (trimmedUsername.includes("@") && !trimmedUsername.toLowerCase().endsWith("@gmail.com")) {
+        setError("Please use your Gmail address.");
+        return;
+      }
+
       setIsSubmitting(true);
 
       try {

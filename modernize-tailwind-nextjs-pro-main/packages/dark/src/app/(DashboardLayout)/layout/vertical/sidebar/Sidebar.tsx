@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 
 const SidebarLayout = () => {
   const { isCollapse } = useContext(CustomizerContext);
-  const { user } = useContext(UserDataContext);
+  const { user, permissions } = useContext(UserDataContext);
   const { logout } = useContext(AuthContext);
   const router = useRouter();
 
@@ -54,7 +54,17 @@ const SidebarLayout = () => {
                 className={`${isCollapse === "full-sidebar" ? "px-6" : "px-4"}`}
               >
                 <Sidebar.ItemGroup className="sidebar-nav">
-                  {SidebarContent.map((item, index) => (
+                  {SidebarContent.map((item, index) => {
+                    // Filter children based on permissions
+                    const validChildren = item.children?.filter(child => {
+                       if (!child.requiredPermission) return true;
+                       return permissions?.includes(child.requiredPermission);
+                    });
+
+                    // Skip the heading if no valid children remain
+                    if (!validChildren || validChildren.length === 0) return null;
+
+                    return (
                     <React.Fragment key={index}>
                       <h5 className="text-link font-bold text-xs dark:text-darklink caption">
                         <span className="hide-menu leading-21">
@@ -67,7 +77,7 @@ const SidebarLayout = () => {
                         />
                       </h5>
 
-                      {item.children?.map((child, i) => (
+                      {validChildren.map((child, i) => (
                         <React.Fragment key={child.id && i}>
                           {child.children ? (
                             <div className="collpase-items">
@@ -79,7 +89,8 @@ const SidebarLayout = () => {
                         </React.Fragment>
                       ))}
                     </React.Fragment>
-                  ))}
+                    );
+                  })}
                 </Sidebar.ItemGroup>
               </Sidebar.Items>
             </SimpleBar>

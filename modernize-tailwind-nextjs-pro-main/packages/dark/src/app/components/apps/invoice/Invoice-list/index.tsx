@@ -12,7 +12,7 @@ interface ReminderListProps {
 }
 
 function ReminderList({ filter }: ReminderListProps) {
-  const { reminders } = useContext(UserDataContext); // Use Context
+  const { reminders, user, permissions } = useContext(UserDataContext); // Use Context
   
   // DEBUG: Check what the UI receives
   useEffect(() => {
@@ -152,12 +152,23 @@ function ReminderList({ filter }: ReminderListProps) {
             <Table.HeadCell className="text-center">Action</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
-            {filteredReminders.map((reminder: Reminder) => (
+            {filteredReminders.map((reminder: Reminder) => {
+              const startOfWeek = new Date();
+              startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+              
+              const isCompanyAdmin = permissions?.includes('reminders.manage_company');
+              const isDeptAdmin = permissions?.includes('reminders.manage_department');
+              const isOwner = user?.email === reminder.senderEmail;
+              
+              const canManage = isCompanyAdmin || isDeptAdmin || isOwner;
+
+              return (
               <Table.Row key={reminder.id} className="bg-white dark:bg-gray-800">
                 <Table.Cell className="p-4">
                   <Checkbox
                     checked={selectedReminders.includes(reminder.id)}
                     onChange={() => toggleSelectReminder(reminder.id)}
+                    disabled={!canManage} 
                   />
                 </Table.Cell>
                 <Table.Cell>{reminder.id}</Table.Cell>
@@ -173,6 +184,8 @@ function ReminderList({ filter }: ReminderListProps) {
                 </Table.Cell>
                 <Table.Cell className="text-center">
                   <div className="flex justify-center gap-3">
+                    {canManage && (
+                    <>
                     <Tooltip content="Edit Reminder">
                       <Link href={`/apps/invoice/edit/${reminder.id}`}>
                         <Button size="xs" className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -192,10 +205,13 @@ function ReminderList({ filter }: ReminderListProps) {
                         <Icon icon="tabler:trash" height={18} />
                       </Button>
                     </Tooltip>
+                    </>
+                    )}
                   </div>
                 </Table.Cell>
               </Table.Row>
-            ))}
+            );
+            })}
           </Table.Body>
         </Table>
       </div>
